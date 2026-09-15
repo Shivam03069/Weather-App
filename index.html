@@ -569,7 +569,7 @@
   </main>
 
   <script>
-    const RAPID_API_KEY = "YOUR_RAPIDAPI_KEY";
+    const RAPID_API_KEY = "https://air-quality-by-api-ninjas.p.rapidapi.com/v1/airquality?city=Seattle";
 
     const endpoint =
       "https://air-quality-by-api-ninjas.p.rapidapi.com/v1/airquality";
@@ -692,7 +692,7 @@
       const response = await fetch(url, {
         method: "GET",
         headers: {
-          "X-RapidAPI-Key": RAPID_API_KEY,
+          "X-RapidAPI-Key": "https://air-quality-by-api-ninjas.p.rapidapi.com/v1/airquality?city=Seattle",
           "X-RapidAPI-Host": "air-quality-by-api-ninjas.p.rapidapi.com"
         }
       });
@@ -709,7 +709,7 @@
     }
 
     async function loadAirQuality(city) {
-      if (RAPID_API_KEY === "YOUR_RAPIDAPI_KEY") {
+      if ("https://air-quality-by-api-ninjas.p.rapidapi.com/v1/airquality?city=Seattle"=== "YOUR_RAPIDAPI_KEY") {
         statusMessage.textContent =
           "Add your RapidAPI key in the JavaScript before making a request.";
         statusMessage.className = "status-message error";
