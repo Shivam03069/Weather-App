@@ -1,71 +1,751 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Weather App</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  </head>
-  <body>
-   <nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Weather App</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">About</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Delhi</a></li>
-            <li><a class="dropdown-item" href="#">Mumbai</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Patna</a></li>
-          </ul>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Usage Guide</a>
-        </li>
-      </ul>
-      <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Location" aria-label="Location"/>
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-    </div>
-  </div>
-</nav>
-<div class="container mt-5">
-  <div class="row">
-    <div class="col-md-6 offset-md-3">
-      <div class="card text-center">
-        <div class="card-header">
-          Weather Information
-        </div>
-        <div class="card-body">
-          <h5 class="card-title" id="location">Location: </h5>
-          <p class="card-text" id="temperature">Temperature: </p>
-          <p class="card-text" id="description">Description: </p>
-        </div>
-        <div class="card-footer text-muted">
-          Last updated: <span id="last-updated"></span>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AirScope - Air Quality Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --bg: #f4f6f1;
+      --surface: #ffffff;
+      --surface-muted: #e8eee5;
+      --ink: #17231c;
+      --muted: #708075;
+      --border: #dbe4d9;
+      --green: #24734d;
+      --green-dark: #174b34;
+      --green-light: #d8f1df;
+      --yellow: #f1bd4c;
+      --orange: #ec8844;
+      --red: #da5752;
+      --purple: #825baf;
+      --shadow: 0 22px 60px rgba(33, 61, 43, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(208, 237, 213, 0.8), transparent 30%),
+        radial-gradient(circle at 100% 90%, rgba(244, 226, 180, 0.35), transparent 28%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "DM Sans", sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app-shell {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 54px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 14px;
+      background: var(--green-dark);
+      color: white;
+      font-size: 22px;
+      box-shadow: 0 8px 20px rgba(23, 75, 52, 0.2);
+    }
+
+    .brand-name {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+    }
+
+    .brand-tag {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .updated {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 0.8fr;
+      align-items: end;
+      gap: 40px;
+      margin-bottom: 30px;
+    }
+
+    .eyebrow {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      max-width: 650px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(42px, 6vw, 76px);
+      line-height: 0.98;
+      letter-spacing: -0.075em;
+    }
+
+    .hero-description {
+      max-width: 520px;
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    .search-panel {
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .search-label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .search-form {
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-input {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      outline: none;
+      background: white;
+      color: var(--ink);
+      padding: 14px 16px;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 4px rgba(36, 115, 77, 0.11);
+    }
+
+    .search-button {
+      border: 0;
+      border-radius: 13px;
+      background: var(--green-dark);
+      color: white;
+      cursor: pointer;
+      padding: 0 20px;
+      font-weight: 700;
+      transition: transform 160ms ease, background 160ms ease;
+    }
+
+    .search-button:hover {
+      background: var(--green);
+      transform: translateY(-2px);
+    }
+
+    .search-button:disabled {
+      cursor: wait;
+      opacity: 0.6;
+      transform: none;
+    }
+
+    .status-message {
+      min-height: 20px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status-message.error {
+      color: var(--red);
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 0.82fr 1.18fr;
+      gap: 20px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: var(--shadow);
+    }
+
+    .overview-card {
+      position: relative;
+      min-height: 360px;
+      overflow: hidden;
+      padding: 30px;
+    }
+
+    .overview-card::after {
+      position: absolute;
+      right: -80px;
+      bottom: -110px;
+      width: 280px;
+      height: 280px;
+      border: 42px solid var(--green-light);
+      border-radius: 50%;
+      content: "";
+      opacity: 0.8;
+    }
+
+    .location {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .location strong {
+      color: var(--ink);
+      font-size: 18px;
+    }
+
+    .aqi-display {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: end;
+      gap: 14px;
+      margin-top: 62px;
+    }
+
+    .aqi-number {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 112px;
+      font-weight: 700;
+      line-height: 0.8;
+      letter-spacing: -0.1em;
+    }
+
+    .aqi-label {
+      padding-bottom: 4px;
+    }
+
+    .aqi-label strong {
+      display: block;
+      color: var(--green);
+      font-size: 22px;
+    }
+
+    .aqi-label span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .aqi-scale {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      margin-top: 54px;
+    }
+
+    .scale-item {
+      height: 7px;
+      border-radius: 20px;
+    }
+
+    .scale-item:nth-child(1) { background: var(--green); }
+    .scale-item:nth-child(2) { background: var(--yellow); }
+    .scale-item:nth-child(3) { background: var(--orange); }
+    .scale-item:nth-child(4) { background: var(--red); }
+    .scale-item:nth-child(5) { background: var(--purple); }
+
+    .scale-labels {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .pollutants-card {
+      padding: 30px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 22px;
+      letter-spacing: -0.04em;
+    }
+
+    .section-heading span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pollutant-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .pollutant {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: #fbfcfa;
+    }
+
+    .pollutant-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .pollutant-name {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .pollutant-icon {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 9px;
+      background: var(--green-light);
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .pollutant-value {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 29px;
+      font-weight: 700;
+      letter-spacing: -0.06em;
+    }
+
+    .pollutant-unit {
+      color: var(--muted);
+      font-size: 11px;
+      margin-left: 4px;
+    }
+
+    .pollutant-aqi {
+      display: inline-block;
+      margin-top: 9px;
+      border-radius: 99px;
+      background: var(--green-light);
+      color: var(--green-dark);
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 35px 10px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .footer-note {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 850px) {
+      .hero,
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        gap: 26px;
+      }
+
+      .overview-card {
+        min-height: 320px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .app-shell {
+        width: min(100% - 24px, 1180px);
+        padding-top: 18px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        margin-bottom: 34px;
+      }
+
+      .updated {
+        display: none;
+      }
+
+      .search-form {
+        flex-direction: column;
+      }
+
+      .search-button {
+        min-height: 48px;
+      }
+
+      .overview-card,
+      .pollutants-card {
+        padding: 22px;
+      }
+
+      .aqi-number {
+        font-size: 88px;
+      }
+
+      .pollutant-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">◌</div>
+        <div>
+          <div class="brand-name">AirScope</div>
+          <div class="brand-tag">Clearer decisions, cleaner air</div>
         </div>
       </div>
-    </div>
-  </div>
-  
 
-  
-</div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script src="script.js"></script>
-  </body>
+      <div class="updated" id="updatedText">Ready to check air quality</div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Live air quality</div>
+        <h1>Know the air before you step outside.</h1>
+        <p class="hero-description">
+          Search any city to see its current air quality index and pollutant
+          breakdown.
+        </p>
+      </div>
+
+      <div class="search-panel">
+        <label class="search-label" for="cityInput">Search location</label>
+
+        <form class="search-form" id="searchForm">
+          <input
+            class="search-input"
+            id="cityInput"
+            type="text"
+            placeholder="Try Seattle"
+            value="Seattle"
+            autocomplete="off"
+            required
+          />
+          <button class="search-button" id="searchButton" type="submit">
+            Search
+          </button>
+        </form>
+
+        <div class="status-message" id="statusMessage"></div>
+      </div>
+    </section>
+
+    <section class="dashboard">
+      <article class="card overview-card">
+        <div class="location">
+          <span>●</span>
+          <strong id="cityName">Seattle</strong>
+        </div>
+
+        <div class="aqi-display">
+          <div class="aqi-number" id="overallAqi">--</div>
+
+          <div class="aqi-label">
+            <strong id="aqiStatus">Waiting</strong>
+            <span>Overall AQI</span>
+          </div>
+        </div>
+
+        <div class="aqi-scale">
+          <div class="scale-item"></div>
+          <div class="scale-item"></div>
+          <div class="scale-item"></div>
+          <div class="scale-item"></div>
+          <div class="scale-item"></div>
+        </div>
+
+        <div class="scale-labels">
+          <span>Good</span>
+          <span>Moderate</span>
+          <span>Unhealthy</span>
+          <span>Hazardous</span>
+        </div>
+      </article>
+
+      <article class="card pollutants-card">
+        <div class="section-heading">
+          <h2>Pollutants</h2>
+          <span id="pollutantCount">Waiting for data</span>
+        </div>
+
+        <div class="pollutant-grid" id="pollutantGrid">
+          <div class="empty-state">
+            Search for a city to load pollutant data.
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <p class="footer-note">
+      Data provided by Air Quality by API-Ninjas through RapidAPI.
+    </p>
+  </main>
+
+  <script>
+    const RAPID_API_KEY = "YOUR_RAPIDAPI_KEY";
+
+    const endpoint =
+      "https://air-quality-by-api-ninjas.p.rapidapi.com/v1/airquality";
+
+    const pollutantOrder = [
+      { key: "CO", label: "Carbon monoxide", short: "CO" },
+      { key: "NO2", label: "Nitrogen dioxide", short: "NO₂" },
+      { key: "O3", label: "Ozone", short: "O₃" },
+      { key: "SO2", label: "Sulfur dioxide", short: "SO₂" },
+      { key: "PM2.5", label: "Fine particles", short: "PM" },
+      { key: "PM10", label: "Coarse particles", short: "PM10" }
+    ];
+
+    const searchForm = document.querySelector("#searchForm");
+    const cityInput = document.querySelector("#cityInput");
+    const searchButton = document.querySelector("#searchButton");
+    const statusMessage = document.querySelector("#statusMessage");
+    const cityName = document.querySelector("#cityName");
+    const overallAqi = document.querySelector("#overallAqi");
+    const aqiStatus = document.querySelector("#aqiStatus");
+    const pollutantGrid = document.querySelector("#pollutantGrid");
+    const pollutantCount = document.querySelector("#pollutantCount");
+    const updatedText = document.querySelector("#updatedText");
+
+    function getAqiStatus(aqi) {
+      if (aqi <= 50) {
+        return { label: "Good", color: "#24734d" };
+      }
+
+      if (aqi <= 100) {
+        return { label: "Moderate", color: "#b98416" };
+      }
+
+      if (aqi <= 150) {
+        return { label: "Unhealthy", color: "#d97831" };
+      }
+
+      if (aqi <= 200) {
+        return { label: "Very unhealthy", color: "#da5752" };
+      }
+
+      return { label: "Hazardous", color: "#825baf" };
+    }
+
+    function formatNumber(value) {
+      if (typeof value !== "number") {
+        return "--";
+      }
+
+      return value % 1 === 0 ? value : value.toFixed(2);
+    }
+
+    function renderPollutants(data) {
+      const availablePollutants = pollutantOrder.filter(
+        ({ key }) => data[key]
+      );
+
+      pollutantCount.textContent = `${availablePollutants.length} readings`;
+
+      if (!availablePollutants.length) {
+        pollutantGrid.innerHTML = `
+          <div class="empty-state">
+            No pollutant readings were returned for this city.
+          </div>
+        `;
+        return;
+      }
+
+      pollutantGrid.innerHTML = availablePollutants
+        .map(({ key, label, short }) => {
+          const pollutant = data[key];
+          const concentration = pollutant.concentration;
+          const pollutantAqi = pollutant.aqi;
+
+          return `
+            <div class="pollutant">
+              <div class="pollutant-top">
+                <span class="pollutant-name">${label}</span>
+                <span class="pollutant-icon">${short}</span>
+              </div>
+
+              <div>
+                <span class="pollutant-value">
+                  ${formatNumber(concentration)}
+                </span>
+                <span class="pollutant-unit">µg/m³</span>
+              </div>
+
+              ${
+                pollutantAqi !== undefined
+                  ? `<span class="pollutant-aqi">AQI ${formatNumber(pollutantAqi)}</span>`
+                  : ""
+              }
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function renderData(city, data) {
+      const aqi = Number(data.overall_aqi) || 0;
+      const status = getAqiStatus(aqi);
+
+      cityName.textContent = city;
+      overallAqi.textContent = aqi || "--";
+      aqiStatus.textContent = aqi ? status.label : "Unavailable";
+      aqiStatus.style.color = status.color;
+
+      updatedText.textContent = `Updated ${new Date().toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit"
+      })}`;
+
+      renderPollutants(data);
+    }
+
+    async function fetchAirQuality(city) {
+      const url = `${endpoint}?city=${encodeURIComponent(city)}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "X-RapidAPI-Key": RAPID_API_KEY,
+          "X-RapidAPI-Host": "air-quality-by-api-ninjas.p.rapidapi.com"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          response.status === 401 || response.status === 403
+            ? "Your RapidAPI key is missing or invalid."
+            : `Request failed with status ${response.status}.`
+        );
+      }
+
+      return response.json();
+    }
+
+    async function loadAirQuality(city) {
+      if (RAPID_API_KEY === "YOUR_RAPIDAPI_KEY") {
+        statusMessage.textContent =
+          "Add your RapidAPI key in the JavaScript before making a request.";
+        statusMessage.className = "status-message error";
+        return;
+      }
+
+      searchButton.disabled = true;
+      searchButton.textContent = "Loading...";
+      statusMessage.textContent = `Checking air quality in ${city}...`;
+      statusMessage.className = "status-message";
+
+      try {
+        const data = await fetchAirQuality(city);
+        renderData(city, data);
+
+        statusMessage.textContent = `Air quality loaded for ${city}.`;
+      } catch (error) {
+        statusMessage.textContent = error.message;
+        statusMessage.className = "status-message error";
+      } finally {
+        searchButton.disabled = false;
+        searchButton.textContent = "Search";
+      }
+    }
+
+    searchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const city = cityInput.value.trim();
+
+      if (city) {
+        loadAirQuality(city);
+      }
+    });
+
+    loadAirQuality("Seattle");
+  </script>
+</body>
 </html>
